@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================ -->
+        <!--  Partenaires de démo                                          -->
+        <!-- ============================================================ -->
+        <record id="partner_demo_a" model="res.partner">
+            <field name="name">Atelier Dupont (démo)</field>
+            <field name="is_company" eval="True"/>
+            <field name="email">atelier.dupont@example.com</field>
+        </record>
+        <record id="partner_demo_b" model="res.partner">
+            <field name="name">Menuiserie Léon (démo)</field>
+            <field name="is_company" eval="True"/>
+            <field name="email">contact@menuiserie-leon.example.com</field>
+        </record>
+        <record id="partner_demo_c" model="res.partner">
+            <field name="name">BTP Rivière (démo)</field>
+            <field name="is_company" eval="True"/>
+            <field name="email">devis@btp-riviere.example.com</field>
+        </record>
+        <record id="partner_demo_d" model="res.partner">
+            <field name="name">Studio Kori (démo)</field>
+            <field name="is_company" eval="True"/>
+            <field name="email">hello@studio-kori.example.com</field>
+        </record>
+        <record id="partner_demo_reply" model="res.partner">
+            <field name="name">Cabinet Astra (démo)</field>
+            <field name="is_company" eval="True"/>
+            <field name="email">contact@cabinet-astra.example.com</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!--  Produit de démo                                              -->
+        <!-- ============================================================ -->
+        <record id="product_demo_service" model="product.product">
+            <field name="name">Prestation de conseil (démo)</field>
+            <field name="type">service</field>
+            <field name="list_price">480.0</field>
+            <field name="sale_ok" eval="True"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!--  10 devis à différents stades                                 -->
+        <!-- ============================================================ -->
+
+        <!-- 1. Brouillon : jamais envoyé -> hors périmètre -->
+        <record id="so_demo_draft" model="sale.order">
+            <field name="partner_id" ref="partner_demo_a"/>
+            <field name="date_order" eval="(DateTime.now() - relativedelta(days=2))"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="state">draft</field>
+        </record>
+        <record id="sol_demo_draft" model="sale.order.line">
+            <field name="order_id" ref="so_demo_draft"/>
+            <field name="product_id" ref="product_demo_service"/>
+            <field name="product_uom_qty">2</field>
+        </record>
+
+        <!-- 2. Envoyé J+1 : trop tôt pour relancer -->
+        <record id="so_demo_j1" model="sale.order">
+            <field name="partner_id" ref="partner_demo_b"/>
+            <field name="date_order" eval="(DateTime.now() - relativedelta(days=1))"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="state">sent</field>
+            <field name="followup_sent_date" eval="(DateTime.now() - relativedelta(days=1))"/>
+        </record>
+        <record id="sol_demo_j1" model="sale.order.line">
+            <field name="order_id" ref="so_demo_j1"/>
+            <field name="product_id" ref="product_demo_service"/>
+            <field name="product_uom_qty">3</field>
+        </record>
+
+        <!-- 3. Envoyé J+3 : rappel doux dû -->
+        <record id="so_demo_j3" model="sale.order">
+            <field name="partner_id" ref="partner_demo_c"/>
+            <field name="date_order" eval="(DateTime.now() - relativedelta(days=3))"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="state">sent</field>
+            <field name="followup_sent_date" eval="(DateTime.now() - relativedelta(days=3))"/>
+        </record>
+        <record id="sol_demo_j3" model="sale.order.line">
+            <field name="order_id" ref="so_demo_j3"/>
+            <field name="product_id" ref="product_demo_service"/>
+            <field name="product_uom_qty">4</field>
+        </record>
+
+        <!-- 4. Envoyé J+5 : rappel doux déjà envoyé, en attente de J+7 -->
+        <record id="so_demo_j5" model="sale.order">
+            <field name="partner_id" ref="partner_demo_d"/>
+            <field name="date_order" eval="(DateTime.now() - relativedelta(days=5))"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="state">sent</field>
+            <field name="followup_sent_date" eval="(DateTime.now() - relativedelta(days=5))"/>
+        </record>
+        <record id="sol_demo_j5" model="sale.order.line">
+            <field name="order_id" ref="so_demo_j5"/>
+            <field name="product_id" ref="product_demo_service"/>
+            <field name="product_uom_qty">1</field>
+        </record>
+        <record id="fl_demo_j5_reminder" model="sale.order.followup.line">
+            <field name="order_id" ref="so_demo_j5"/>
+            <field name="level">reminder</field>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="channel">email</field>
+            <field name="days_since_sent">3</field>
+        </record>
+
+        <!-- 5. Envoyé J+7 : relance ferme due (aucune relance encore) -->
+        <record id="so_demo_j7" model="sale.order">
+            <field name="partner_id" ref="partner_demo_a"/>
+            <field name="date_order" eval="(DateTime.now() - relativedelta(days=7))"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="state">sent</field>
+            <field name="followup_sent_date" eval="(DateTime.now() - relativedelta(days=7))"/>
+        </record>
+        <record id="sol_demo_j7" model="sale.order.line">
+            <field name="order_id" ref="so_demo_j7"/>
+            <field name="product_id" ref="product_demo_service"/>
+            <field name="product_uom_qty">6</field>
+        </record>
+
+        <!-- 6. Envoyé J+8 : doux + ferme envoyés, en attente de J+14 -->
+        <record id="so_demo_j8" model="sale.order">
+            <field name="partner_id" ref="partner_demo_b"/>
+            <field name="date_order" eval="(DateTime.now() - relativedelta(days=8))"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="state">sent</field>
+            <field name="followup_sent_date" eval="(DateTime.now() - relativedelta(days=8))"/>
+        </record>
+        <record id="sol_demo_j8" model="sale.order.line">
+            <field name="order_id" ref="so_demo_j8"/>
+            <field name="product_id" ref="product_demo_service"/>
+            <field name="product_uom_qty">2</field>
+        </record>
+        <record id="fl_demo_j8_reminder" model="sale.order.followup.line">
+            <field name="order_id" ref="so_demo_j8"/>
+            <field name="level">reminder</field>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="channel">email</field>
+            <field name="days_since_sent">3</field>
+        </record>
+        <record id="fl_demo_j8_firm" model="sale.order.followup.line">
+            <field name="order_id" ref="so_demo_j8"/>
+            <field name="level">firm</field>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="channel">email</field>
+            <field name="days_since_sent">7</field>
+        </record>
+
+        <!-- 7. Envoyé J+14 : dernière relance due -->
+        <record id="so_demo_j14" model="sale.order">
+            <field name="partner_id" ref="partner_demo_c"/>
+            <field name="date_order" eval="(DateTime.now() - relativedelta(days=14))"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="state">sent</field>
+            <field name="followup_sent_date" eval="(DateTime.now() - relativedelta(days=14))"/>
+        </record>
+        <record id="sol_demo_j14" model="sale.order.line">
+            <field name="order_id" ref="so_demo_j14"/>
+            <field name="product_id" ref="product_demo_service"/>
+            <field name="product_uom_qty">5</field>
+        </record>
+        <record id="fl_demo_j14_reminder" model="sale.order.followup.line">
+            <field name="order_id" ref="so_demo_j14"/>
+            <field name="level">reminder</field>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="channel">email</field>
+            <field name="days_since_sent">3</field>
+        </record>
+        <record id="fl_demo_j14_firm" model="sale.order.followup.line">
+            <field name="order_id" ref="so_demo_j14"/>
+            <field name="level">firm</field>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="channel">email</field>
+            <field name="days_since_sent">7</field>
+        </record>
+
+        <!-- 8. Envoyé J+21 : cycle de relances terminé -->
+        <record id="so_demo_j21" model="sale.order">
+            <field name="partner_id" ref="partner_demo_d"/>
+            <field name="date_order" eval="(DateTime.now() - relativedelta(days=21))"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="state">sent</field>
+            <field name="followup_sent_date" eval="(DateTime.now() - relativedelta(days=21))"/>
+        </record>
+        <record id="sol_demo_j21" model="sale.order.line">
+            <field name="order_id" ref="so_demo_j21"/>
+            <field name="product_id" ref="product_demo_service"/>
+            <field name="product_uom_qty">2</field>
+        </record>
+        <record id="fl_demo_j21_reminder" model="sale.order.followup.line">
+            <field name="order_id" ref="so_demo_j21"/>
+            <field name="level">reminder</field>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="channel">email</field>
+            <field name="days_since_sent">3</field>
+        </record>
+        <record id="fl_demo_j21_firm" model="sale.order.followup.line">
+            <field name="order_id" ref="so_demo_j21"/>
+            <field name="level">firm</field>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="channel">email</field>
+            <field name="days_since_sent">7</field>
+        </record>
+        <record id="fl_demo_j21_last" model="sale.order.followup.line">
+            <field name="order_id" ref="so_demo_j21"/>
+            <field name="level">last</field>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="channel">email</field>
+            <field name="days_since_sent">14</field>
+        </record>
+
+        <!-- 9. Envoyé J+10 mais le client a répondu par email -> exclu -->
+        <record id="so_demo_replied" model="sale.order">
+            <field name="partner_id" ref="partner_demo_reply"/>
+            <field name="date_order" eval="(DateTime.now() - relativedelta(days=10))"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="state">sent</field>
+            <field name="followup_sent_date" eval="(DateTime.now() - relativedelta(days=10))"/>
+        </record>
+        <record id="sol_demo_replied" model="sale.order.line">
+            <field name="order_id" ref="so_demo_replied"/>
+            <field name="product_id" ref="product_demo_service"/>
+            <field name="product_uom_qty">3</field>
+        </record>
+        <record id="msg_demo_replied" model="mail.message">
+            <field name="model">sale.order</field>
+            <field name="res_id" ref="so_demo_replied"/>
+            <field name="message_type">email</field>
+            <field name="subtype_id" ref="mail.mt_comment"/>
+            <field name="author_id" ref="partner_demo_reply"/>
+            <field name="email_from">contact@cabinet-astra.example.com</field>
+            <field name="date" eval="(DateTime.now() - relativedelta(days=2))"/>
+            <field name="body"><![CDATA[<p>Bonjour, merci pour le devis. Nous revenons vers vous très prochainement.</p>]]></field>
+        </record>
+
+        <!-- 10. Envoyé J+6 mais marqué « Ne pas relancer » -> exclu -->
+        <record id="so_demo_blocked" model="sale.order">
+            <field name="partner_id" ref="partner_demo_a"/>
+            <field name="date_order" eval="(DateTime.now() - relativedelta(days=6))"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="state">sent</field>
+            <field name="followup_sent_date" eval="(DateTime.now() - relativedelta(days=6))"/>
+            <field name="followup_block" eval="True"/>
+        </record>
+        <record id="sol_demo_blocked" model="sale.order.line">
+            <field name="order_id" ref="so_demo_blocked"/>
+            <field name="product_id" ref="product_demo_service"/>
+            <field name="product_uom_qty">2</field>
+        </record>
+
+    </data>
+</odoo>
