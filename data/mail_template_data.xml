@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- J+3 — Rappel doux -->
+        <record id="mail_template_followup_reminder" model="mail.template">
+            <field name="name">Devis : rappel doux (J+3)</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="subject">Votre devis {{ object.name }} — au cas où</field>
+            <field name="email_from">{{ (object.user_id.email_formatted or object.company_id.email_formatted) }}</field>
+            <field name="email_to">{{ object.partner_id.email_formatted }}</field>
+            <field name="lang">{{ object.partner_id.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+                <div style="margin:0px;padding:0px;font-size:14px;">
+                    <p>Bonjour <t t-out="object.partner_id.name or ''">Client</t>,</p>
+                    <p>
+                        Nous revenons brièvement vers vous au sujet de notre devis
+                        <strong t-out="object.name or ''">S00000</strong>, d'un montant de
+                        <strong t-out="'%.2f' % object.amount_total">0.00</strong>
+                        <t t-out="object.currency_id.name or ''">EUR</t>,
+                        que nous vous avons transmis il y a quelques jours.
+                    </p>
+                    <p>
+                        Nous restons à votre entière disposition pour tout ajustement,
+                        complément d'information ou échange de vive voix.
+                    </p>
+                    <p>
+                        <a t-att-href="object.get_portal_url()"
+                           style="background-color:#714B67;color:#fff;padding:8px 16px;text-decoration:none;border-radius:4px;">
+                            Consulter mon devis
+                        </a>
+                    </p>
+                    <p>Bien cordialement,<br/>
+                        <t t-out="object.user_id.name or object.company_id.name or ''">Commercial</t>
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <!-- J+7 — Relance ferme -->
+        <record id="mail_template_followup_firm" model="mail.template">
+            <field name="name">Devis : relance ferme (J+7)</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="subject">Relance : votre devis {{ object.name }}</field>
+            <field name="email_from">{{ (object.user_id.email_formatted or object.company_id.email_formatted) }}</field>
+            <field name="email_to">{{ object.partner_id.email_formatted }}</field>
+            <field name="lang">{{ object.partner_id.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+                <div style="margin:0px;padding:0px;font-size:14px;">
+                    <p>Bonjour <t t-out="object.partner_id.name or ''">Client</t>,</p>
+                    <p>
+                        Sauf erreur de notre part, notre devis
+                        <strong t-out="object.name or ''">S00000</strong>
+                        (<t t-out="'%.2f' % object.amount_total">0.00</t>
+                        <t t-out="object.currency_id.name or ''">EUR</t>)
+                        est resté sans retour de votre part.
+                    </p>
+                    <p t-if="object.validity_date">
+                        Nous attirons votre attention sur le fait que cette offre est valable
+                        jusqu'au <strong t-out="format_date(object.validity_date)">2024-01-01</strong>.
+                    </p>
+                    <p>
+                        Pourriez-vous nous indiquer la suite que vous souhaitez y donner&#160;?
+                        Nous sommes disponibles pour un point rapide si certains éléments
+                        méritent d'être revus.
+                    </p>
+                    <p>
+                        <a t-att-href="object.get_portal_url()"
+                           style="background-color:#714B67;color:#fff;padding:8px 16px;text-decoration:none;border-radius:4px;">
+                            Revoir le devis
+                        </a>
+                    </p>
+                    <p>Bien cordialement,<br/>
+                        <t t-out="object.user_id.name or object.company_id.name or ''">Commercial</t>
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <!-- J+14 — Dernière relance -->
+        <record id="mail_template_followup_last" model="mail.template">
+            <field name="name">Devis : dernière relance (J+14)</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="subject">Dernière relance — devis {{ object.name }}</field>
+            <field name="email_from">{{ (object.user_id.email_formatted or object.company_id.email_formatted) }}</field>
+            <field name="email_to">{{ object.partner_id.email_formatted }}</field>
+            <field name="lang">{{ object.partner_id.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+                <div style="margin:0px;padding:0px;font-size:14px;">
+                    <p>Bonjour <t t-out="object.partner_id.name or ''">Client</t>,</p>
+                    <p>
+                        Il s'agit de notre dernière relance concernant le devis
+                        <strong t-out="object.name or ''">S00000</strong>
+                        (<t t-out="'%.2f' % object.amount_total">0.00</t>
+                        <t t-out="object.currency_id.name or ''">EUR</t>).
+                    </p>
+                    <p>
+                        Sans retour de votre part sous quelques jours, nous considérerons
+                        que cette offre n'est plus d'actualité et clôturerons le dossier.
+                        Les conditions tarifaires ne pourront alors plus être garanties.
+                    </p>
+                    <p>
+                        Si le projet reste d'actualité, un simple message suffit pour que
+                        nous reprenions contact.
+                    </p>
+                    <p>
+                        <a t-att-href="object.get_portal_url()"
+                           style="background-color:#714B67;color:#fff;padding:8px 16px;text-decoration:none;border-radius:4px;">
+                            Consulter le devis
+                        </a>
+                    </p>
+                    <p>Bien cordialement,<br/>
+                        <t t-out="object.user_id.name or object.company_id.name or ''">Commercial</t>
+                    </p>
+                </div>
+            </field>
+        </record>
+
+    </data>
+</odoo>
