@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Quotations list: expose the follow-up columns -->
+    <record id="view_quotation_tree_followup" model="ir.ui.view">
+        <field name="name">sale.order.list.followup</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>
+        <field name="arch" type="xml">
+            <field name="state" position="before">
+                <field name="followup_days_since_sent" string="Jours depuis envoi"
+                       optional="show"
+                       decoration-warning="followup_days_since_sent &gt;= 7"
+                       decoration-danger="followup_days_since_sent &gt;= 14"/>
+                <field name="followup_last_level" optional="hide"/>
+                <field name="followup_count" string="Relances" optional="hide"/>
+                <field name="followup_block" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Quotations search: "En attente de relance" filter + group by -->
+    <record id="view_sales_order_filter_followup" model="ir.ui.view">
+        <field name="name">sale.order.search.followup</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_view_search_inherit_quotation"/>
+        <field name="arch" type="xml">
+            <filter name="draft" position="after">
+                <separator/>
+                <filter name="followup_pending" string="En attente de relance"
+                        domain="['&amp;', '&amp;', '&amp;',
+                                 ('state', '=', 'sent'),
+                                 ('followup_block', '=', False),
+                                 ('followup_last_level', '!=', 'last'),
+                                 ('followup_days_since_sent', '&gt;=', 3)]"/>
+                <filter name="followup_overdue" string="Sans relance depuis J+7"
+                        domain="['&amp;', '&amp;', '&amp;',
+                                 ('state', '=', 'sent'),
+                                 ('followup_block', '=', False),
+                                 ('followup_count', '=', 0),
+                                 ('followup_days_since_sent', '&gt;=', 7)]"/>
+                <filter name="followup_sent" string="Relance envoyée"
+                        domain="[('followup_count', '&gt;', 0)]"/>
+                <filter name="followup_blocked" string="Relance désactivée"
+                        domain="[('followup_block', '=', True)]"/>
+            </filter>
+            <filter name="my_quotation" position="after">
+                <filter name="group_followup_level" string="Niveau de relance"
+                        context="{'group_by': 'followup_last_level'}"/>
+            </filter>
+        </field>
+    </record>
+
+    <!-- Quotation form: sent date, block flag, smart button, relances page, action button -->
+    <record id="view_order_form_followup" model="ir.ui.view">
+        <field name="name">sale.order.form.followup</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button type="object" name="action_open_followup_lines"
+                        class="oe_stat_button" icon="fa-bell-o"
+                        invisible="followup_count == 0">
+                    <field name="followup_count" widget="statinfo" string="Relances"/>
+                </button>
+            </xpath>
+
+            <xpath expr="//header" position="inside">
+                <button name="action_followup_send_now" type="object"
+                        string="Relancer maintenant" class="btn-secondary"
+                        invisible="state != 'sent' or followup_block"
+                        groups="sales_team.group_sale_salesman"/>
+            </xpath>
+
+            <xpath expr="//field[@name='validity_date']" position="after">
+                <field name="followup_sent_date" readonly="1"
+                       invisible="not followup_sent_date"/>
+                <field name="followup_days_since_sent"
+                       invisible="state != 'sent' or not followup_sent_date"/>
+                <field name="followup_block"/>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Relances" name="followup_page"
+                      invisible="not followup_sent_date and not followup_line_ids">
+                    <group>
+                        <group>
+                            <field name="followup_sent_date" readonly="1"/>
+                            <field name="followup_days_since_sent"/>
+                        </group>
+                        <group>
+                            <field name="followup_last_level"/>
+                            <field name="followup_last_date"/>
+                            <field name="followup_block"/>
+                        </group>
+                    </group>
+                    <field name="followup_line_ids" readonly="1">
+                        <list string="Historique des relances">
+                            <field name="create_date" string="Envoyée le"/>
+                            <field name="level"
+                                   decoration-warning="level == 'firm'"
+                                   decoration-danger="level == 'last'"/>
+                            <field name="days_since_sent"/>
+                            <field name="channel"/>
+                            <field name="user_id"/>
+                            <field name="manual" optional="hide"/>
+                            <field name="mail_template_id" optional="hide"/>
+                            <field name="activity_id" optional="hide"/>
+                            <field name="note" optional="hide"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

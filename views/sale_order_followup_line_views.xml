@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sale_order_followup_line_list" model="ir.ui.view">
+        <field name="name">sale.order.followup.line.list</field>
+        <field name="model">sale.order.followup.line</field>
+        <field name="arch" type="xml">
+            <list string="Relances de devis" create="false" edit="false">
+                <field name="create_date" string="Envoyée le"/>
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="level" decoration-warning="level == 'firm'" decoration-danger="level == 'last'"/>
+                <field name="days_since_sent"/>
+                <field name="channel"/>
+                <field name="user_id"/>
+                <field name="manual" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sale_order_followup_line_search" model="ir.ui.view">
+        <field name="name">sale.order.followup.line.search</field>
+        <field name="model">sale.order.followup.line</field>
+        <field name="arch" type="xml">
+            <search string="Relances de devis">
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <filter name="f_reminder" string="Rappel doux" domain="[('level', '=', 'reminder')]"/>
+                <filter name="f_firm" string="Relance ferme" domain="[('level', '=', 'firm')]"/>
+                <filter name="f_last" string="Dernière relance" domain="[('level', '=', 'last')]"/>
+                <separator/>
+                <filter name="f_manual" string="Manuelles" domain="[('manual', '=', True)]"/>
+                <filter name="f_this_month" string="Ce mois-ci" domain="[('create_date', '&gt;=', (context_today().replace(day=1)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="g_level" string="Niveau" context="{'group_by': 'level'}"/>
+                    <filter name="g_user" string="Commercial" context="{'group_by': 'user_id'}"/>
+                    <filter name="g_partner" string="Client" context="{'group_by': 'partner_id'}"/>
+                    <filter name="g_month" string="Mois" context="{'group_by': 'create_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sale_order_followup_line" model="ir.actions.act_window">
+        <field name="name">Relances de devis</field>
+        <field name="res_model">sale.order.followup.line</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_g_level': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucune relance envoyée pour le moment</p>
+            <p>Les relances sont générées par le cron quotidien « Devis : relances automatiques progressives »
+               ou manuellement depuis un devis via le bouton « Relancer maintenant ».</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_sale_order_followup_line"
+              name="Relances de devis"
+              parent="sale.menu_sale_quotations"
+              action="action_sale_order_followup_line"
+              sequence="95"/>
+
+</odoo>
