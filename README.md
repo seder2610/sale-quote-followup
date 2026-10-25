@@ -89,7 +89,7 @@ flowchart LR
 | Relance ferme (jours) | `sale_quote_followup.firm_days` | `7` |
 | Dernière relance (jours) | `sale_quote_followup.last_days` | `14` |
 | Canal | `sale_quote_followup.channel` | `email` (`email` / `activity` / `both`) |
-| Responsable des activités | `sale_quote_followup.activity_user_id` | `<YOUR_ODOO_USER>` (à choisir) |
+| Responsable des activités | `sale_quote_followup.activity_user_id` | vide = le commercial du devis |
 
 Destinataire des emails : l'adresse du client sur le devis ; expéditeur : commercial ou société. Aucun secret ni adresse réelle dans le dépôt (les emails de démo sont en `example.com`).
 
