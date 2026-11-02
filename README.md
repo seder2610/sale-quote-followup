@@ -31,7 +31,7 @@ Exécution réelle sur une base jetable avec les **données de démonstration** 
 | Passage du cron | Lignes d'historique |
 |---|---|
 | avant (démo chargée) | 8 |
-| après le 1er passage | 11 (+3 relances envoyées, ex. S00027 « last », S00025 « firm », S00023 « reminder ») |
+| après le 1er passage | 11 (+3 relances envoyées, une par palier : `reminder`, `firm`, `last`) |
 | après le 2e passage | 11 (aucun doublon : le cron est ré-entrant) |
 
 Captures (données de démonstration) :
@@ -134,10 +134,9 @@ Destinataire des emails : l'adresse du client sur le devis ; expéditeur : comme
 
 ## Performances
 
-Le moteur de relance est **borné en requêtes** quel que soit le nombre de devis :
-une `search`, un `fetch` de préchargement, une seule requête `mail.message` pour
-la détection des réponses, et **un seul `create`** groupé pour tout l'historique
-(pas de N+1). Le seul coût par devis est l'envoi de l'email lui‑même, inhérent.
+Les étapes de détection et d'historique sont **bornées en requêtes** : une `search`, un `fetch` de préchargement, une seule requête `mail.message` pour la détection des réponses (3 requêtes mesurées pour 1, 5 ou 10 devis), et **un seul `create`** groupé pour tout l'historique (pas de N+1 sur ces étapes).
+
+Le traitement complet n'est en revanche **pas** à coût constant : mesuré sur la base de démo, `_followup_process` fait 54 requêtes pour 1 devis et 84 pour 10, soit environ 3 requêtes de plus par devis (email, activité, chatter).
 
 ---
 
