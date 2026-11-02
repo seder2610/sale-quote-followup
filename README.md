@@ -136,7 +136,7 @@ Destinataire des emails : l'adresse du client sur le devis ; expéditeur : comme
 
 Les étapes de détection et d'historique sont **bornées en requêtes** : une `search`, un `fetch` de préchargement, une seule requête `mail.message` pour la détection des réponses (3 requêtes mesurées pour 1, 5 ou 10 devis), et **un seul `create`** groupé pour tout l'historique (pas de N+1 sur ces étapes).
 
-Le traitement complet n'est en revanche **pas** à coût constant : mesuré sur la base de démo, `_followup_process` fait 54 requêtes pour 1 devis et 84 pour 10, soit environ 3 requêtes de plus par devis (email, activité, chatter).
+Le traitement complet n'est en revanche **pas** à coût constant : mesuré sur deux bases Odoo 18 (une base neuve avec démo, un clone de `odoo_test`), `_followup_process` fait de 24 à 54 requêtes pour 1 devis (selon l'état des caches) et 82 à 84 pour 10 : le coût croît avec le nombre de devis (email, activité, chatter).
 
 ---
 
